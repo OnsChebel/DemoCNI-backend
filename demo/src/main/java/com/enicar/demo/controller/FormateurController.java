@@ -1,6 +1,8 @@
 package com.enicar.demo.controller;
 
 
+import com.enicar.demo.dto.FormateurDTO;
+import com.enicar.demo.mapper.FormateurMapper;
 import com.enicar.demo.model.Formateur;
 import com.enicar.demo.repository.FormateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/formateurs")
@@ -18,30 +21,39 @@ public class FormateurController {
     private FormateurRepository formateurRepository;
 
     @GetMapping
-    public List<Formateur> getAllFormateurs() {return formateurRepository.findAll();}
+    public List<FormateurDTO> getAllFormateurs() {
+        return formateurRepository.findAll()
+                .stream()
+                .map(FormateurMapper::toDTO)
+                .collect(Collectors.toList());}
 
     @GetMapping("/{id}")
-    public ResponseEntity<Formateur> getFormateurById(@PathVariable Integer id) {
-        return formateurRepository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<FormateurDTO> getFormateurById(@PathVariable Integer id) {
+        return formateurRepository.findById(id)
+                .map(FormateurMapper::toDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/new-formateur")
-    public ResponseEntity<Formateur> createFormateur(@RequestBody Formateur formateur) {
+    public ResponseEntity<FormateurDTO> createFormateur(@RequestBody FormateurDTO formateurDTO) {
+        Formateur formateur = FormateurMapper.toEntity(formateurDTO);
         Formateur savedFormateur = formateurRepository.save(formateur);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedFormateur);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(FormateurMapper.toDTO(savedFormateur));
     }
 
     @PutMapping("/update-formateur/{id}")
-    public ResponseEntity<Formateur> updateFormateur(@PathVariable Integer id, @RequestBody Formateur formateurDetails) {
+    public ResponseEntity<FormateurDTO> updateFormateur(@PathVariable Integer id, @RequestBody FormateurDTO formateurDetailsDTO) {
         return formateurRepository.findById(id)
                 .map( formateur -> {
-                    formateur.setNom_prenom(formateurDetails.getNom_prenom());
-                    formateur.setSpecialite(formateurDetails.getSpecialite());
-                    formateur.setDirection(formateurDetails.getDirection());
-                    formateur.setEntreprise(formateurDetails.getEntreprise());
+                    formateur.setNom_prenom(formateurDetailsDTO.getNom_prenom());
+                    formateur.setSpecialite(formateurDetailsDTO.getSpecialite());
+                    formateur.setDirection(formateurDetailsDTO.getDirection());
+                    formateur.setEntreprise(formateurDetailsDTO.getEntreprise());
 
                     Formateur updatedFormateur = formateurRepository.save(formateur);
-                    return ResponseEntity.ok(updatedFormateur);
+                    return ResponseEntity.ok(FormateurMapper.toDTO(updatedFormateur));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
