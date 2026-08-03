@@ -20,6 +20,6 @@ public class ParticipantDTO {
     private Integer tel_port;
     private String mail;
     private String theme_part;
-    private int num_salle;
+    private Integer num_salle;
     private LocalDate date_debut;
 }

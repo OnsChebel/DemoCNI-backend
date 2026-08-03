@@ -24,18 +24,20 @@ public class Participant {
     private Integer cin;
     @Column(name = "entreprise", nullable = false)
     private String entreprise;
-    @Column(name = "tel_fix", nullable = false)
+    @Column(name = "tel_fix", nullable = true)
     private Integer tel_fix;
-    @Column(name = "fax", nullable = false)
+    @Column(name = "fax", nullable = true)
     private String fax;
     @Column(name = "tel_port", nullable = false)
     private Integer tel_port;
-    @Column(name = "mail", nullable = false)
+    @Column(name = "mail", nullable = false, unique = true)
     private String mail;
-    @Column(name = "theme_part", nullable = false)
+    @Column(name = "password")
+    private String password;
+    @Column(name = "theme_part", nullable = true)
     private String theme_part;
-    @Column(name = "num_salle", nullable = false)
-    private int num_salle;
-    @Column(name = "date_debut", nullable = false)
+    @Column(name = "num_salle", nullable = true)
+    private Integer num_salle;
+    @Column(name = "date_debut", nullable = true)
     private LocalDate date_debut;
 }
