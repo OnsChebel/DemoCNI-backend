@@ -21,7 +21,7 @@ public class Participant {
     @Column(name = "nom_prenom", nullable = false)
     private String nom_prenom;
     @Column(name = "cin", nullable = false)
-    private Integer cin;
+    private String cin;
     @Column(name = "entreprise", nullable = false)
     private String entreprise;
     @Column(name = "tel_fix", nullable = true)
