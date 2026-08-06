@@ -28,23 +28,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
-            if (jwtUtils.validateToken(token)) {
-                String login = jwtUtils.getLoginFromToken(token);
+            try {
+                if (jwtUtils.validateToken(token)) {
+                    String login = jwtUtils.getLoginFromToken(token);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(login);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(login);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (Exception e) {
+                logger.warn("Token JWT invalide ou expiré ignoré : " + e.getMessage());
             }
         }
 

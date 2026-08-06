@@ -25,4 +25,9 @@ public class Formateur {
     private String direction;
     @Column(name = "entreprise", nullable = false)
     private String entreprise;
+    @Column(unique = true, nullable = false)
+    private String login;
+    private String password;
+    @Builder.Default
+    private Boolean isFirstLogin = true;
 }

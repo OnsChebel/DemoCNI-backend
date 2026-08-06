@@ -12,6 +12,9 @@ public class FormateurMapper {
                 .specialite(formateur.getSpecialite())
                 .direction(formateur.getDirection())
                 .entreprise(formateur.getEntreprise())
+                .login(formateur.getLogin())
+                .password(formateur.getPassword())
+                .isFirstLogin(formateur.getIsFirstLogin())
                 .build();
     }
 
@@ -23,6 +26,9 @@ public class FormateurMapper {
                 .specialite(dto.getSpecialite())
                 .direction(dto.getDirection())
                 .entreprise(dto.getEntreprise())
+                .login(dto.getLogin())
+                .password(dto.getPassword())
+                .isFirstLogin(dto.isFirstLogin())
                 .build();
     }
 }

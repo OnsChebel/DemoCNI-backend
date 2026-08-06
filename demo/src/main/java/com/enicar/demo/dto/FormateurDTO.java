@@ -16,4 +16,7 @@ public class FormateurDTO {
     private String specialite;
     private String direction;
     private String entreprise;
+    private String login;
+    private String password;
+    private boolean isFirstLogin;
 }

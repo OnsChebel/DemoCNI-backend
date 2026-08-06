@@ -3,8 +3,10 @@ package com.enicar.demo.controller;
 import com.enicar.demo.dto.LoginRequestDTO;
 import com.enicar.demo.dto.AuthResponseDTO;
 import com.enicar.demo.dto.ParticipantRegisterDTO;
+import com.enicar.demo.model.Formateur;
 import com.enicar.demo.model.Participant;
 import com.enicar.demo.repository.AdministrateurRepository;
+import com.enicar.demo.repository.FormateurRepository;
 import com.enicar.demo.repository.ParticipantRepository;
 import com.enicar.demo.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +36,13 @@ public class AuthController {
     private ParticipantRepository participantRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private AdministrateurRepository administrateurRepository;
 
     @Autowired
-    private AdministrateurRepository administrateurRepository;
+    private FormateurRepository formateurRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
@@ -52,11 +57,18 @@ public class AuthController {
             Object userObj = null;
 
             Optional<Participant> participant = participantRepository.findByMail(loginRequest.getLogin());
+            Optional<Formateur> formateur = formateurRepository.findByLogin(loginRequest.getLogin());
+
             if (participant.isPresent()) {
                 role = "PARTICIPANT";
                 Participant p = participant.get();
                 p.setPassword(null);
                 userObj = p;
+            } else if (formateur.isPresent()) {
+                role = "FORMATEUR";
+                Formateur f = formateur.get();
+                f.setPassword(null);
+                userObj = f;
             } else {
                 userObj = administrateurRepository.findByLogin(loginRequest.getLogin()).orElse(null);
             }
