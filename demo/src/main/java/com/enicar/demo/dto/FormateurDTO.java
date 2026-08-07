@@ -1,6 +1,7 @@
 package com.enicar.demo.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,5 +19,6 @@ public class FormateurDTO {
     private String entreprise;
     private String login;
     private String password;
-    private boolean isFirstLogin;
+    @JsonProperty("isFirstLogin")
+    private Boolean isFirstLogin;
 }

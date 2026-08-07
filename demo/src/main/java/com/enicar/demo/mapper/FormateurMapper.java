@@ -5,7 +5,11 @@ import com.enicar.demo.model.Formateur;
 
 public class FormateurMapper {
     public static FormateurDTO toDTO(Formateur formateur) {
-        if(formateur == null) return null;
+        if (formateur == null) return null;
+
+        boolean isFirst = Boolean.TRUE.equals(formateur.getIsFirstLogin());
+        String passwordToSend = isFirst ? formateur.getPassword() : null;
+
         return FormateurDTO.builder()
                 .id(formateur.getId())
                 .nom_prenom(formateur.getNom_prenom())
@@ -13,13 +17,13 @@ public class FormateurMapper {
                 .direction(formateur.getDirection())
                 .entreprise(formateur.getEntreprise())
                 .login(formateur.getLogin())
-                .password(formateur.getPassword())
-                .isFirstLogin(formateur.getIsFirstLogin())
+                .password(passwordToSend)
+                .isFirstLogin(isFirst)
                 .build();
     }
 
     public static Formateur toEntity(FormateurDTO dto) {
-        if(dto == null) return null;
+        if (dto == null) return null;
         return Formateur.builder()
                 .id(dto.getId())
                 .nom_prenom(dto.getNom_prenom())
@@ -28,7 +32,7 @@ public class FormateurMapper {
                 .entreprise(dto.getEntreprise())
                 .login(dto.getLogin())
                 .password(dto.getPassword())
-                .isFirstLogin(dto.isFirstLogin())
+                .isFirstLogin(dto.getIsFirstLogin())
                 .build();
     }
 }

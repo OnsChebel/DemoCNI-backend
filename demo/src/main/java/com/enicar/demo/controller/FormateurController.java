@@ -12,6 +12,7 @@ import com.enicar.demo.repository.InscriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -33,6 +34,9 @@ public class FormateurController {
     @Autowired
     private InscriptionRepository inscriptionRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public FormateurController(FormateurRepository formateurRepository,
                                CycleRepository cycleRepository,
                                InscriptionRepository inscriptionRepository) {
@@ -44,9 +48,7 @@ public class FormateurController {
     @GetMapping("/cycles/{cycleId}/participants")
     public ResponseEntity<List<Participant>> getParticipantsByCycle(@PathVariable Integer cycleId) {
         List<Participant> participants = inscriptionRepository.findParticipantsByCycleId(cycleId);
-
         participants.forEach(p -> p.setPassword(null));
-
         return ResponseEntity.ok(participants);
     }
 
@@ -56,7 +58,7 @@ public class FormateurController {
         String password = credentials.get("password");
 
         return formateurRepository.findByLogin(login)
-                .filter(f -> f.getPassword() != null && f.getPassword().equals(password))
+                .filter(f -> f.getPassword() != null && passwordEncoder.matches(password, f.getPassword()))
                 .map(f -> {
                     Map<String, Object> response = new HashMap<>();
                     response.put("id", f.getId());
@@ -70,10 +72,10 @@ public class FormateurController {
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
         return formateurRepository.findById(request.getFormateurId()).map(f -> {
-            if (!f.getPassword().equals(request.getAncienPassword())) {
+            if (!passwordEncoder.matches(request.getAncienPassword(), f.getPassword())) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Ancien mot de passe incorrect"));
             }
-            f.setPassword(request.getNouveauPassword());
+            f.setPassword(passwordEncoder.encode(request.getNouveauPassword()));
             f.setIsFirstLogin(false);
             formateurRepository.save(f);
             return ResponseEntity.ok(Map.of("message", "Mot de passe mis à jour avec succès"));
@@ -108,9 +110,12 @@ public class FormateurController {
     @PostMapping("/new-formateur")
     public ResponseEntity<FormateurDTO> createFormateur(@RequestBody FormateurDTO formateurDTO) {
         Formateur formateur = FormateurMapper.toEntity(formateurDTO);
-        if (formateur.getIsFirstLogin() == null) {
-            formateur.setIsFirstLogin(true);
+        formateur.setIsFirstLogin(true);
+
+        if (formateur.getPassword() != null && !formateur.getPassword().isBlank()) {
+            formateur.setPassword(passwordEncoder.encode(formateur.getPassword()));
         }
+
         Formateur savedFormateur = formateurRepository.save(formateur);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(FormateurMapper.toDTO(savedFormateur));
@@ -125,8 +130,16 @@ public class FormateurController {
                     formateur.setDirection(formateurDetailsDTO.getDirection());
                     formateur.setEntreprise(formateurDetailsDTO.getEntreprise());
 
-                    if (formateurDetailsDTO.getLogin() != null) formateur.setLogin(formateurDetailsDTO.getLogin());
-                    if (formateurDetailsDTO.getPassword() != null) formateur.setPassword(formateurDetailsDTO.getPassword());
+                    if (formateurDetailsDTO.getLogin() != null) {
+                        formateur.setLogin(formateurDetailsDTO.getLogin());
+                    }
+
+                    if (Boolean.TRUE.equals(formateur.getIsFirstLogin())
+                            && formateurDetailsDTO.getPassword() != null
+                            && !formateurDetailsDTO.getPassword().isBlank()) {
+
+                        formateur.setPassword(passwordEncoder.encode(formateurDetailsDTO.getPassword()));
+                    }
 
                     Formateur updatedFormateur = formateurRepository.save(formateur);
                     return ResponseEntity.ok(FormateurMapper.toDTO(updatedFormateur));
