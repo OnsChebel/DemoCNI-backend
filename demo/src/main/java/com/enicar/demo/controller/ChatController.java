@@ -24,7 +24,6 @@ public class ChatController {
 
         String userQuestion = payload.get("question");
 
-        // Pas de clé API → mode de secours
         if (apiKey == null || apiKey.trim().isEmpty()) {
             return ResponseEntity.ok(
                     Map.of("response", reponseDeSecours(userQuestion))
@@ -54,7 +53,6 @@ public class ChatController {
 
         Map<String, Object> requestBody = new HashMap<>();
 
-        // Modèle gratuit
         requestBody.put("model", "openrouter/free");
 
         requestBody.put(
